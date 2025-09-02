@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Коран с переводом</title>
+    <style>
+        :root {
+            --primary-color: #2c5e2e;
+            --secondary-color: #f8f5e6;
+            --text-color: #333;
+            --accent-color: #8d6e63;
+            --header-height: 60px;
+            --sidebar-width: 280px;
+        }
+
+        .theme-light {
+            --bg-color: #f8f5e6;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --border-color: #ddd;
+        }
+
+        .theme-dark {
+            --bg-color: #1a1a1a;
+            --text-color: #f0f0f0;
+            --card-bg: #2d2d2d;
+            --border-color: #444;
+        }
+
+        .theme-sepia {
+            --bg-color: #f5eed6;
+            --text-color: #5a4a42;
+            --card-bg: #e9e2cb;
+            --border-color: #c4b59d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+        }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--card-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+            overflow-y: auto;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 20px;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 0 0 10px 10px;
+        }
+
+        .theme-selector {
+            display: flex;
+            gap: 10px;
+        }
+
+        .theme-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid white;
+            cursor: pointer;
+        }
+
+        .theme-light-btn { background-color: #f8f5e6; }
+        .theme-dark-btn { background-color: #1a1a1a; }
+        .theme-sepia-btn { background-color: #f5eed6; }
+
+        .surah-list {
+            margin-top: 20px;
+        }
+
+        .surah-item {
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .surah-item:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .surah-content {
+            background-color: var(--card-bg);
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            line-height: 1.8;
+        }
+
+        .verse {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .arabic {
+            font-size: 24px;
+            text-align: right;
+            margin-bottom: 10px;
+            font-family: 'Traditional Arabic', Scheherazade, serif;
+            line-height: 2;
+        }
+
+        .translation {
+            font-style: italic;
+            color: var(--text-color);
+            opacity: 0.9;
+        }
+
+        .verse-number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 10px;
+            font-size: 14px;
+        }
+
+        .bookmark-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .bookmark-btn:hover {
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body class="theme-light">
+    <div class="container">
+        <div class="sidebar">
+            <h2>Содержание</h2>
+            <div class="surah-list">
+                <!-- Список сур будет сгенерирован JavaScript -->
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <header>
+                <h1>Чтение Корана</h1>
+                <div class="theme-selector">
+                    <button class="theme-btn theme-light-btn" onclick="changeTheme('light')"></button>
+                    <button class="theme-btn theme-dark-btn" onclick="changeTheme('dark')"></button>
+                    <button class="theme-btn theme-sepia-btn" onclick="changeTheme('sepia')"></button>
+                </div>
+            </header>
+            
+            <div class="surah-content">
+                <!-- Содержание суры будет отображаться здесь -->
+                <div class="welcome-message">
+                    <h2>Добро пожаловать</h2>
+                    <p>Выберите суру из списка слева для начала чтения.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Данные для демонстрации (в реальном приложении здесь будут все суры)
+        const quranData = {
+            surahs: [
+                {
+                    number: 1,
+                    name: "Аль-Фатиха",
+                    arabicName: "الفاتحة",
+                    translation: "Открывающая",
+                    verses: [
+                        {
+                            number: 1,
+                            arabic: "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
+                            translation: "Во имя Аллаха, Милостивого, Милосердного!"
+                        },
+                        {
+                            number: 2,
+                            arabic: "الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ",
+                            translation: "Хвала Аллаху, Господу миров,"
+                        },
+                        {
+                            number: 3,
+                            arabic: "الرَّحْمَٰنِ الرَّحِيمِ",
+                            translation: "Милостивому, Милосердному,"
+                        },
+                        {
+                            number: 4,
+                            arabic: "مَالِكِ يَوْمِ الدِّينِ",
+                            translation: "Властелину Дня воздаяния!"
+                        },
+                        {
+                            number: 5,
+                            arabic: "إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ",
+                            translation: "Тебе одному мы поклоняемся и Тебя одного молим о помощи."
+                        },
+                        {
+                            number: 6,
+                            arabic: "اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ",
+                            translation: "Веди нас прямым путем,"
+                        },
+                        {
+                            number: 7,
+                            arabic: "صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ",
+                            translation: "путем тех, кого Ты облагодетельствовал, не тех, на кого пал гнев, и не заблудших."
+                        }
+                    ]
+                },
+                {
+                    number: 2,
+                    name: "Аль-Бакара",
+                    arabicName: "البقرة",
+                    translation: "Корова",
+                    verses: [
+                        {
+                            number: 1,
+                            arabic: "الم",
+                            translation: "Алиф. Лам. Мим."
+                        },
+                        {
+                            number: 2,
+                            arabic: "ذَٰلِكَ الْكِتَابُ لَا رَيْبَ ۛ فِيهِ ۛ هُدًى لِلْمُتَّقِينَ",
+                            translation: "Это Писание, в котором нет сомнения, является верным руководством для богобоязненных,"
+                        },
+                        {
+                            number: 3,
+                            arabic: "الَّذِينَ يُؤْمِنُونَ بِالْغَيْبِ وَيُقِيمُونَ الصَّلَاةَ وَمِمَّا رَزَقْنَاهُمْ يُنْفِقُونَ",
+                            translation: "которые веруют в сокровенное, совершают намаз и расходуют из того, чем Мы их наделили,"
+                        }
+                    ]
+                },
+                {
+                    number: 114,
+                    name: "Ан-Нас",
+                    arabicName: "الناس",
+                    translation: "Люди",
+                    verses: [
+                        {
+                            number: 1,
+                            arabic: "قُلْ أَعُوذُ بِرَبِّ النَّاسِ",
+                            translation: "Скажи: «Прибегаю к защите Господа людей,"
+                        },
+                        {
+                            number: 2,
+                            arabic: "مَلِكِ النَّاسِ",
+                            translation: "Царя людей,"
+                        },
+                        {
+                            number: 3,
+                            arabic: "إِلَٰهِ النَّاسِ",
+                            translation: "Бога людей,"
+                        },
+                        {
+                            number: 4,
+                            arabic: "مِنْ شَرِّ الْوَسْوَاسِ الْخَنَّاسِ",
+                            translation: "от зла искусителя отступающего (или сжимающегося) при поминании Аллаха,"
+                        },
+                        {
+                            number: 5,
+                            arabic: "الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ",
+                            translation: "который наущает в груди людей,"
+                        },
+                        {
+                            number: 6,
+                            arabic: "مِنَ الْجِنَّةِ وَالنَّاسِ",
+                            translation: "от джиннов и людей»."
+                        }
+                    ]
+                }
+            ]
+        };
+
+        // Инициализация приложения
+        document.addEventListener('DOMContentLoaded', function() {
+            renderSurahList();
+        });
+
+        // Функция для отображения списка сур
+        function renderSurahList() {
+            const surahList = document.querySelector('.surah-list');
+            surahList.innerHTML = '';
+            
+            quranData.surahs.forEach(surah => {
+                const surahItem = document.createElement('div');
+                surahItem.className = 'surah-item';
+                surahItem.innerHTML = `
+                    <div>
+                        <strong>${surah.number}. ${surah.name}</strong>
+                        <div>${surah.arabicName}</div>
+                    </div>
+                    <div>${surah.translation}</div>
+                `;
+                
+                surahItem.addEventListener('click', () => {
+                    displaySurah(surah);
+                });
+                
+                surahList.appendChild(surahItem);
+            });
+        }
+
+        // Функция для отображения выбранной суры
+        function displaySurah(surah) {
+            const surahContent = document.querySelector('.surah-content');
+            
+            let versesHTML = '';
+            surah.verses.forEach(verse => {
+                versesHTML += `
+                    <div class="verse">
+                        <div class="arabic">${verse.arabic}</div>
+                        <div class="translation">
+                            <span class="verse-number">${verse.number}</span>
+                            ${verse.translation}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            surahContent.innerHTML = `
+                <h2>${surah.number}. ${surah.name} (${surah.arabicName})</h2>
+                <p><em>${surah.translation}</em></p>
+                ${versesHTML}
+                <button class="bookmark-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    Добавить в закладки
+                </button>
+            `;
+        }
+
+        // Функция для смены темы
+        function changeTheme(theme) {
+            document.body.className = `theme-${theme}`;
+            
+            // Сохраняем выбор темы в localStorage
+            localStorage.setItem('theme', theme);
+        }
+
+        // При загрузке проверяем сохраненную тему
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            changeTheme(savedTheme);
+        }
+    </script>
+</body>
+</html>
