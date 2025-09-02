@@ -3,233 +3,535 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#2c5e2e">
+    <meta name="description" content="Приложение для чтения Корана с переводом и возможностью сохранения прогресса">
     <title>Коран с переводом</title>
+    <link rel="manifest" id="manifest">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>📖</text></svg>">
     <style>
         :root {
-            --primary-color: #2c5e2e;
-            --secondary-color: #f8f5e6;
-            --text-color: #333;
-            --accent-color: #8d6e63;
-            --header-height: 60px;
-            --sidebar-width: 280px;
-        }
-
-        .theme-light {
-            --bg-color: #f8f5e6;
-            --text-color: #333;
-            --card-bg: #ffffff;
-            --border-color: #ddd;
+            --primary: #2c5e2e;
+            --primary-light: #4a7c4b;
+            --primary-dark: #1e421f;
+            --accent: #8d6e63;
+            --accent-light: #b98f7f;
+            --text: #333333;
+            --text-light: #666666;
+            --bg: #f8f5e6;
+            --card: #ffffff;
+            --border: #e0dcc6;
+            --shadow: rgba(0, 0, 0, 0.1);
         }
 
         .theme-dark {
-            --bg-color: #1a1a1a;
-            --text-color: #f0f0f0;
-            --card-bg: #2d2d2d;
-            --border-color: #444;
+            --primary: #4a7c4b;
+            --primary-light: #5d945e;
+            --primary-dark: #3a633b;
+            --accent: #a1887f;
+            --accent-light: #c0a99f;
+            --text: #f0f0f0;
+            --text-light: #cccccc;
+            --bg: #1a1a1a;
+            --card: #2d2d2d;
+            --border: #444444;
+            --shadow: rgba(0, 0, 0, 0.3);
         }
 
         .theme-sepia {
-            --bg-color: #f5eed6;
-            --text-color: #5a4a42;
-            --card-bg: #e9e2cb;
-            --border-color: #c4b59d;
+            --primary: #7c5d2e;
+            --primary-light: #a37c49;
+            --primary-dark: #5e421f;
+            --accent: #8d7363;
+            --accent-light: #b98f7f;
+            --text: #5a4a42;
+            --text-light: #8a7a72;
+            --bg: #f5eed6;
+            --card: #e9e2cb;
+            --border: #d6cfb8;
+            --shadow: rgba(0, 0, 0, 0.08);
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            transition: background-color 0.3s, color 0.3s;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
         }
 
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
             line-height: 1.6;
             display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
             min-height: 100vh;
         }
 
-        .container {
-            display: flex;
-            width: 100%;
-        }
-
-        .sidebar {
-            width: var(--sidebar-width);
-            background-color: var(--card-bg);
-            border-right: 1px solid var(--border-color);
-            padding: 20px;
-            overflow-y: auto;
-            height: 100vh;
-            position: fixed;
-            left: 0;
-            top: 0;
-        }
-
-        .main-content {
-            flex: 1;
-            margin-left: var(--sidebar-width);
-            padding: 20px;
-        }
-
         header {
-            background-color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
-            padding: 15px 20px;
+            padding: 16px 20px;
             position: sticky;
             top: 0;
             z-index: 100;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-radius: 0 0 10px 10px;
+            box-shadow: 0 2px 10px var(--shadow);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .logo-icon {
+            font-size: 1.5rem;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
         }
 
         .theme-selector {
             display: flex;
-            gap: 10px;
+            gap: 8px;
         }
 
         .theme-btn {
-            width: 30px;
-            height: 30px;
+            width: 26px;
+            height: 26px;
             border-radius: 50%;
             border: 2px solid white;
             cursor: pointer;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
         }
 
-        .theme-light-btn { background-color: #f8f5e6; }
-        .theme-dark-btn { background-color: #1a1a1a; }
-        .theme-sepia-btn { background-color: #f5eed6; }
+        .theme-light-btn { background: linear-gradient(135deg, #f8f5e6, #e0dcc6); }
+        .theme-dark-btn { background: linear-gradient(135deg, #1a1a1a, #2d2d2d); }
+        .theme-sepia-btn { background: linear-gradient(135deg, #f5eed6, #e9e2cb); }
+
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 280px;
+            background-color: var(--card);
+            border-right: 1px solid var(--border);
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .search-box {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid var(--border);
+            border-radius: 25px;
+            background-color: var(--bg);
+            color: var(--text);
+            font-size: 0.9rem;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(44, 94, 46, 0.2);
+        }
 
         .surah-list {
-            margin-top: 20px;
+            overflow-y: auto;
+            flex: 1;
         }
 
         .surah-item {
             padding: 12px 15px;
             margin-bottom: 8px;
-            background-color: var(--card-bg);
+            background-color: var(--card);
             border-radius: 8px;
             cursor: pointer;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--border);
+            transition: all 0.2s;
         }
 
         .surah-item:hover {
-            background-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px var(--shadow);
+            border-color: var(--primary-light);
+        }
+
+        .surah-item.active {
+            background-color: var(--primary-light);
             color: white;
+            border-color: var(--primary);
+        }
+
+        .surah-info {
+            flex: 1;
+        }
+
+        .surah-name {
+            font-weight: bold;
+            margin-bottom: 3px;
+        }
+
+        .surah-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+
+        .surah-item.active .surah-details {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .surah-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 50%;
+            font-size: 0.8rem;
+            margin-left: 10px;
+            flex-shrink: 0;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .surah-header {
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px var(--shadow);
+        }
+
+        .surah-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .surah-title-text {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .surah-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 0.9rem;
+            opacity: 0.9;
         }
 
         .surah-content {
-            background-color: var(--card-bg);
+            background-color: var(--card);
             padding: 25px;
             border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 10px var(--shadow);
             margin-bottom: 20px;
             line-height: 1.8;
+            flex: 1;
         }
 
         .verse {
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .verse:last-child {
+            border-bottom: none;
         }
 
         .arabic {
             font-size: 24px;
             text-align: right;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             font-family: 'Traditional Arabic', Scheherazade, serif;
             line-height: 2;
+            color: var(--text);
         }
 
         .translation {
-            font-style: italic;
-            color: var(--text-color);
-            opacity: 0.9;
+            color: var(--text-light);
+            margin-bottom: 10px;
         }
 
         .verse-number {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             width: 30px;
             height: 30px;
-            background-color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
             border-radius: 50%;
-            text-align: center;
-            line-height: 30px;
             margin-right: 10px;
-            font-size: 14px;
+            font-size: 0.9rem;
         }
 
-        .bookmark-btn {
-            background-color: var(--primary-color);
-            color: white;
+        .verse-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn {
+            padding: 8px 15px;
             border: none;
-            padding: 10px 15px;
             border-radius: 5px;
             cursor: pointer;
-            margin-top: 10px;
             display: flex;
             align-items: center;
             gap: 5px;
+            font-size: 0.9rem;
+            transition: all 0.2s;
         }
 
-        .bookmark-btn:hover {
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+
+        .btn-primary:hover {
             opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px var(--shadow);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .progress-container {
+            background-color: var(--card);
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px var(--shadow);
+            margin-top: 20px;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .progress-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background-color: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 4px;
+            transition: width 0.5s;
+        }
+
+        .progress-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .navigation-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .install-btn {
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            color: white;
+        }
+
+        .install-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px var(--shadow);
+        }
+
+        footer {
+            text-align: center;
+            padding: 15px;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border);
+            margin-top: auto;
         }
 
         @media (max-width: 768px) {
-            .container {
+            .main-container {
                 flex-direction: column;
             }
             
             .sidebar {
                 width: 100%;
-                height: auto;
-                position: relative;
+                height: 300px;
                 border-right: none;
-                border-bottom: 1px solid var(--border-color);
+                border-bottom: 1px solid var(--border);
             }
             
-            .main-content {
-                margin-left: 0;
+            .surah-title {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
             }
+            
+            .surah-meta {
+                flex-wrap: wrap;
+            }
+            
+            .header-controls {
+                flex-wrap: wrap;
+                justify-content: flex-end;
+            }
+        }
+
+        /* Анимации */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
         }
     </style>
 </head>
 <body class="theme-light">
-    <div class="container">
-        <div class="sidebar">
-            <h2>Содержание</h2>
-            <div class="surah-list">
-                <!-- Список сур будет сгенерирован JavaScript -->
+    <div class="app-container">
+        <header>
+            <div class="logo">
+                <span class="logo-icon">📖</span>
+                <span>Коран с переводом</span>
+            </div>
+            <div class="header-controls">
+                <div class="theme-selector">
+                    <button class="theme-btn theme-light-btn" onclick="changeTheme('light')" title="Светлая тема"></button>
+                    <button class="theme-btn theme-dark-btn" onclick="changeTheme('dark')" title="Темная тема"></button>
+                    <button class="theme-btn theme-sepia-btn" onclick="changeTheme('sepia')" title="Тема сепия"></button>
+                </div>
+                <button id="installBtn" class="btn install-btn" style="display: none;">
+                    <span>Установить</span>
+                </button>
+            </div>
+        </header>
+        
+        <div class="main-container">
+            <div class="sidebar">
+                <div class="search-box">
+                    <input type="text" class="search-input" placeholder="Поиск сур..." id="searchInput">
+                </div>
+                <div class="surah-list" id="surahList">
+                    <!-- Список сур будет сгенерирован JavaScript -->
+                </div>
+            </div>
+            
+            <div class="main-content">
+                <div class="surah-header">
+                    <div class="surah-title">
+                        <div class="surah-title-text" id="surahTitle">Выберите суру для чтения</div>
+                        <div class="surah-meta">
+                            <span id="surahDetails"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="surah-content" id="surahContent">
+                    <div class="welcome-message">
+                        <h2>Добро пожаловать в приложение для чтения Корана</h2>
+                        <p>Выберите суру из списка слева для начала чтения. Приложение сохраняет ваш прогресс автоматически.</p>
+                    </div>
+                </div>
+                
+                <div class="progress-container">
+                    <div class="progress-header">
+                        <div class="progress-title">Ваш прогресс</div>
+                        <div id="progressPercent">0%</div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                    </div>
+                    <div class="progress-stats">
+                        <span id="readVerses">0 прочитано</span>
+                        <span id="totalVerses">0 всего</span>
+                    </div>
+                </div>
+                
+                <div class="navigation-buttons">
+                    <button class="btn btn-primary" onclick="markSurahAsRead()">
+                        <span>Отметить как прочитанную</span>
+                    </button>
+                    <button class="btn btn-outline" onclick="resetProgress()">
+                        <span>Сбросить прогресс</span>
+                    </button>
+                </div>
             </div>
         </div>
         
-        <div class="main-content">
-            <header>
-                <h1>Чтение Корана</h1>
-                <div class="theme-selector">
-                    <button class="theme-btn theme-light-btn" onclick="changeTheme('light')"></button>
-                    <button class="theme-btn theme-dark-btn" onclick="changeTheme('dark')"></button>
-                    <button class="theme-btn theme-sepia-btn" onclick="changeTheme('sepia')"></button>
-                </div>
-            </header>
-            
-            <div class="surah-content">
-                <!-- Содержание суры будет отображаться здесь -->
-                <div class="welcome-message">
-                    <h2>Добро пожаловать</h2>
-                    <p>Выберите суру из списка слева для начала чтения.</p>
-                </div>
-            </div>
-        </div>
+        <footer>
+            <p>Приложение для чтения Корана &copy; 2023</p>
+        </footer>
     </div>
 
     <script>
@@ -345,41 +647,118 @@
 
         // Инициализация приложения
         document.addEventListener('DOMContentLoaded', function() {
-            renderSurahList();
+            // Загрузка данных
+            loadQuranData().then(() => {
+                renderSurahList();
+                updateProgress();
+                
+                // Проверка, есть ли ранее открытая сура
+                const lastSurah = localStorage.getItem('lastSurah');
+                if (lastSurah) {
+                    const surah = quranData.surahs.find(s => s.number == lastSurah);
+                    if (surah) {
+                        displaySurah(surah);
+                    }
+                }
+            });
+            
+            // Настройка PWA
+            setupPWA();
         });
+
+        // Функция для загрузки данных Корана
+        async function loadQuranData() {
+            try {
+                // Попытка загрузить из локального хранилища
+                const savedData = localStorage.getItem('quranData');
+                if (savedData) {
+                    Object.assign(quranData, JSON.parse(savedData));
+                    return;
+                }
+                
+                // Если данных нет, используем встроенные
+                console.log("Используются встроенные данные Корана");
+            } catch (error) {
+                console.error("Ошибка загрузки данных:", error);
+            }
+        }
 
         // Функция для отображения списка сур
         function renderSurahList() {
-            const surahList = document.querySelector('.surah-list');
+            const surahList = document.getElementById('surahList');
             surahList.innerHTML = '';
             
             quranData.surahs.forEach(surah => {
                 const surahItem = document.createElement('div');
                 surahItem.className = 'surah-item';
+                surahItem.dataset.number = surah.number;
+                
+                // Проверяем, прочитана ли сура
+                const readStatus = localStorage.getItem(`surah_${surah.number}_read`);
+                if (readStatus === 'true') {
+                    surahItem.classList.add('active');
+                }
+                
                 surahItem.innerHTML = `
-                    <div>
-                        <strong>${surah.number}. ${surah.name}</strong>
-                        <div>${surah.arabicName}</div>
+                    <div class="surah-info">
+                        <div class="surah-name">${surah.number}. ${surah.name}</div>
+                        <div class="surah-details">
+                            <span>${surah.arabicName}</span>
+                            <span>${surah.verses.length} аятов</span>
+                        </div>
                     </div>
-                    <div>${surah.translation}</div>
+                    <div class="surah-number">${surah.number}</div>
                 `;
                 
                 surahItem.addEventListener('click', () => {
                     displaySurah(surah);
+                    
+                    // Прокручиваем к активному элементу
+                    document.querySelectorAll('.surah-item').forEach(item => {
+                        item.classList.remove('active');
+                    });
+                    surahItem.classList.add('active');
                 });
                 
                 surahList.appendChild(surahItem);
+            });
+            
+            // Поиск
+            const searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('input', function() {
+                const query = this.value.toLowerCase();
+                document.querySelectorAll('.surah-item').forEach(item => {
+                    const surahNumber = item.dataset.number;
+                    const surah = quranData.surahs.find(s => s.number == surahNumber);
+                    
+                    if (surah.name.toLowerCase().includes(query) || 
+                        surah.arabicName.includes(query) || 
+                        surah.translation.toLowerCase().includes(query)) {
+                        item.style.display = 'flex';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
             });
         }
 
         // Функция для отображения выбранной суры
         function displaySurah(surah) {
-            const surahContent = document.querySelector('.surah-content');
+            const surahTitle = document.getElementById('surahTitle');
+            const surahDetails = document.getElementById('surahDetails');
+            const surahContent = document.getElementById('surahContent');
+            
+            surahTitle.textContent = `${surah.number}. ${surah.name}`;
+            surahDetails.innerHTML = `
+                <span>${surah.arabicName}</span> • 
+                <span>${surah.translation}</span> • 
+                <span>${surah.verses.length} аятов</span>
+            `;
             
             let versesHTML = '';
             surah.verses.forEach(verse => {
                 versesHTML += `
-                    <div class="verse">
+                    <div class="verse fade-in">
                         <div class="arabic">${verse.arabic}</div>
                         <div class="translation">
                             <span class="verse-number">${verse.number}</span>
@@ -389,28 +768,141 @@
                 `;
             });
             
-            surahContent.innerHTML = `
-                <h2>${surah.number}. ${surah.name} (${surah.arabicName})</h2>
-                <p><em>${surah.translation}</em></p>
-                ${versesHTML}
-                <button class="bookmark-btn">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-                    </svg>
-                    Добавить в закладки
-                </button>
-            `;
+            surahContent.innerHTML = versesHTML;
+            
+            // Сохраняем последнюю открытую суру
+            localStorage.setItem('lastSurah', surah.number);
+            
+            // Пометка как прочитанной, если все аяты прочитаны
+            checkSurahReadStatus(surah);
+        }
+
+        // Функция для проверки статуса прочтения суры
+        function checkSurahReadStatus(surah) {
+            const readStatus = localStorage.getItem(`surah_${surah.number}_read`);
+            if (readStatus === 'true') {
+                document.querySelectorAll('.surah-item').forEach(item => {
+                    if (item.dataset.number == surah.number) {
+                        item.classList.add('active');
+                    }
+                });
+            }
+        }
+
+        // Функция для отметки суры как прочитанной
+        function markSurahAsRead() {
+            const lastSurah = localStorage.getItem('lastSurah');
+            if (!lastSurah) return;
+            
+            localStorage.setItem(`surah_${lastSurah}_read`, 'true');
+            
+            // Обновляем отображение
+            document.querySelectorAll('.surah-item').forEach(item => {
+                if (item.dataset.number == lastSurah) {
+                    item.classList.add('active');
+                }
+            });
+            
+            updateProgress();
+            
+            // Показываем уведомление
+            alert(`Сура ${lastSurah} отмечена как прочитанная`);
+        }
+
+        // Функция для обновления прогресса
+        function updateProgress() {
+            let readCount = 0;
+            const totalCount = quranData.surahs.length;
+            
+            quranData.surahs.forEach(surah => {
+                if (localStorage.getItem(`surah_${surah.number}_read`) === 'true') {
+                    readCount++;
+                }
+            });
+            
+            const percent = Math.round((readCount / totalCount) * 100);
+            
+            document.getElementById('progressPercent').textContent = `${percent}%`;
+            document.getElementById('progressFill').style.width = `${percent}%`;
+            document.getElementById('readVerses').textContent = `${readCount} прочитано`;
+            document.getElementById('totalVerses').textContent = `${totalCount} всего`;
+        }
+
+        // Функция для сброса прогресса
+        function resetProgress() {
+            if (confirm("Вы уверены, что хотите сбросить весь прогресс?")) {
+                quranData.surahs.forEach(surah => {
+                    localStorage.removeItem(`surah_${surah.number}_read`);
+                });
+                
+                // Обновляем отображение
+                document.querySelectorAll('.surah-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                
+                updateProgress();
+                
+                alert("Прогресс сброшен");
+            }
         }
 
         // Функция для смены темы
         function changeTheme(theme) {
             document.body.className = `theme-${theme}`;
             
-            // Сохраняем выбор темы в localStorage
+            // Сохраняем выбор темы
             localStorage.setItem('theme', theme);
         }
 
-        // При загрузке проверяем сохраненную тему
+        // Настройка PWA
+        function setupPWA() {
+            // Создаем manifest динамически
+            const manifest = `{
+                "name": "Коран с переводом",
+                "short_name": "Коран",
+                "description": "Приложение для чтения Корана с переводом",
+                "start_url": ".",
+                "display": "standalone",
+                "background_color": "#2c5e2e",
+                "theme_color": "#2c5e2e",
+                "icons": [
+                    {
+                        "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>📖</text></svg>",
+                        "sizes": "192x192",
+                        "type": "image/svg+xml"
+                    }
+                ]
+            }`;
+            
+            const blob = new Blob([manifest], {type: 'application/json'});
+            const manifestURL = URL.createObjectURL(blob);
+            document.getElementById('manifest').href = manifestURL;
+            
+            // Обработка установки приложения
+            let deferredPrompt;
+            const installBtn = document.getElementById('installBtn');
+            
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                installBtn.style.display = 'block';
+            });
+            
+            installBtn.addEventListener('click', async () => {
+                if (!deferredPrompt) return;
+                
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                
+                if (outcome === 'accepted') {
+                    installBtn.style.display = 'none';
+                }
+                
+                deferredPrompt = null;
+            });
+        }
+
+        // Загрузка сохраненной темы
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme) {
             changeTheme(savedTheme);
